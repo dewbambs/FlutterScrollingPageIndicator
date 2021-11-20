@@ -4,7 +4,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class ScrollingPageIndicator extends StatefulWidget {
-
   final double dotSize;
 
   final double dotSelectedSize;
@@ -27,23 +26,20 @@ class ScrollingPageIndicator extends StatefulWidget {
 
   final bool reverse;
 
-  ScrollingPageIndicator({
-    Key key,
-    this.dotSize: 6.0,
-    this.dotSelectedSize: 10.0,
-    this.dotColor: Colors.grey,
-    this.dotSelectedColor: Colors.blueGrey,
-    this.dotSpacing: 12.0,
-    this.visibleDotCount = 5,
-    this.visibleDotThreshold = 2,
-    this.itemCount,
-    this.controller,
-    this.orientation = Axis.horizontal,
-    this.reverse = false
-  })
-      : assert(itemCount != null),
-        assert(controller != null),
-        assert(visibleDotCount % 2 != 0),
+  ScrollingPageIndicator(
+      {Key? key,
+      this.dotSize: 6.0,
+      this.dotSelectedSize: 10.0,
+      this.dotColor: Colors.grey,
+      this.dotSelectedColor: Colors.blueGrey,
+      this.dotSpacing: 12.0,
+      this.visibleDotCount = 5,
+      this.visibleDotThreshold = 2,
+      required this.itemCount,
+      required this.controller,
+      this.orientation = Axis.horizontal,
+      this.reverse = false})
+      : assert(visibleDotCount % 2 != 0),
         super(key: key);
 
   @override
@@ -53,11 +49,9 @@ class ScrollingPageIndicator extends StatefulWidget {
 }
 
 class _ScrollingPageIndicatorState extends State<ScrollingPageIndicator> {
-
   double _page = 0;
 
   Paint _paint = new Paint();
-
 
   @override
   void initState() {
@@ -82,8 +76,7 @@ class _ScrollingPageIndicatorState extends State<ScrollingPageIndicator> {
 
   @override
   Widget build(BuildContext context) {
-    int itemCount = widget.itemCount >= widget.visibleDotCount ? widget.visibleDotCount : widget
-        .itemCount;
+    int itemCount = widget.itemCount >= widget.visibleDotCount ? widget.visibleDotCount : widget.itemCount;
     double width = (itemCount - 1) * widget.dotSpacing + widget.dotSelectedSize;
     Widget child = new SizedBox(
         width: widget.orientation == Axis.horizontal ? width : widget.dotSelectedSize,
@@ -105,19 +98,17 @@ class _ScrollingPageIndicatorState extends State<ScrollingPageIndicator> {
   void _onController() {
     setState(() {});
   }
-
 }
 
 class _Painter extends CustomPainter {
-
   final ScrollingPageIndicator _widget;
   final double _page;
   final Paint _paint;
   final Axis orientation;
 
-  double _visibleFramePosition;
+  late double _visibleFramePosition;
 
-  double _firstDotOffset;
+  late double _firstDotOffset;
 
   _Painter(this._widget, this._page, this._paint, this.orientation) {
     _firstDotOffset = _widget.itemCount > _widget.visibleDotCount ? 0 : _widget.dotSelectedSize / 2;
@@ -125,16 +116,15 @@ class _Painter extends CustomPainter {
 
   double get page {
     try {
-      if(_widget.reverse){
-        return _widget.itemCount-1-_page;
-      }else{
+      if (_widget.reverse) {
+        return _widget.itemCount - 1 - _page;
+      } else {
         return _page;
       }
     } catch (Exception) {
       return 0.0;
     }
   }
-
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -147,16 +137,12 @@ class _Painter extends CustomPainter {
     adjustFramePosition(page, width);
 
     // Some empirical coefficients
-    double scaleDistance = (_widget.dotSpacing + (_widget.dotSelectedSize - _widget.dotSize) / 2) *
-        0.7;
+    double scaleDistance = (_widget.dotSpacing + (_widget.dotSelectedSize - _widget.dotSize) / 2) * 0.7;
     double smallScaleDistance = _widget.dotSelectedSize / 2;
 
-    int firstVisibleDotPos = ((_visibleFramePosition - _firstDotOffset) / _widget.dotSpacing)
-        .floor();
+    int firstVisibleDotPos = ((_visibleFramePosition - _firstDotOffset) / _widget.dotSpacing).floor();
     int lastVisibleDotPos = firstVisibleDotPos +
-        ((_visibleFramePosition + width - getDotOffsetAt(firstVisibleDotPos)) /
-            _widget.dotSpacing)
-            .floor();
+        ((_visibleFramePosition + width - getDotOffsetAt(firstVisibleDotPos)) / _widget.dotSpacing).floor();
 
     // If real dots count is less than we can draw inside visible frame, we move lastVisibleDotPos
     // to the last item
@@ -172,7 +158,7 @@ class _Painter extends CustomPainter {
 
         // Calculate scale according to current page position
         scale = getDotScaleAt(i);
-        diameter = lerpDouble(_widget.dotSize, _widget.dotSelectedSize, scale);
+        diameter = lerpDouble(_widget.dotSize, _widget.dotSelectedSize, scale)!;
 
         // Additional scale for dots at corners
         if (_widget.itemCount > _widget.visibleDotCount) {
@@ -184,24 +170,20 @@ class _Painter extends CustomPainter {
           }
 
           if (dot - _visibleFramePosition < currentScaleDistance) {
-            double calculatedDiameter = diameter * (dot - _visibleFramePosition) /
-                currentScaleDistance;
+            double calculatedDiameter = diameter * (dot - _visibleFramePosition) / currentScaleDistance;
             diameter = min(diameter, calculatedDiameter);
           } else if (dot - _visibleFramePosition > width - currentScaleDistance) {
-            double calculatedDiameter =
-                diameter * (-dot + _visibleFramePosition + width) / currentScaleDistance;
+            double calculatedDiameter = diameter * (-dot + _visibleFramePosition + width) / currentScaleDistance;
             diameter = min(diameter, calculatedDiameter);
           }
         }
 
-        _paint.color = Color.lerp(_widget.dotColor, _widget.dotSelectedColor, scale);
+        _paint.color = Color.lerp(_widget.dotColor, _widget.dotSelectedColor, scale)!;
 
         if (orientation == Axis.horizontal) {
-          canvas.drawCircle(
-              new Offset(dot - _visibleFramePosition, height / 2), diameter / 2, _paint);
+          canvas.drawCircle(new Offset(dot - _visibleFramePosition, height / 2), diameter / 2, _paint);
         } else {
-          canvas.drawCircle(
-              new Offset(height / 2, dot - _visibleFramePosition), diameter / 2, _paint);
+          canvas.drawCircle(new Offset(height / 2, dot - _visibleFramePosition), diameter / 2, _paint);
         }
       }
     }
@@ -246,5 +228,4 @@ class _Painter extends CustomPainter {
   bool shouldRepaint(_Painter oldDelegate) {
     return oldDelegate._page != _page;
   }
-
 }
